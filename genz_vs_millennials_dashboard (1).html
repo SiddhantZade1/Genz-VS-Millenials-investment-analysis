@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gen Z vs Millennials — Investment Intelligence Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;700&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --c-bg:       #06080F;
+  --c-surface:  #0B0F1A;
+  --c-card:     #0F1520;
+  --c-card2:    #141C2B;
+  --c-border:   #1C2740;
+  --c-border2:  #243050;
+  --c-gz:       #00D4FF;
+  --c-ml:       #B06EFF;
+  --c-gz-dim:   rgba(0,212,255,0.12);
+  --c-ml-dim:   rgba(176,110,255,0.12);
+  --c-gold:     #FFB830;
+  --c-green:    #00E5A0;
+  --c-red:      #FF4D6A;
+  --c-text:     #C8D6EF;
+  --c-muted:    #4A5878;
+  --c-muted2:   #2A3550;
+  --c-white:    #EEF4FF;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: 'Syne', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(0,212,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,0.02) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 90% 80% at 50% 0%, black, transparent 70%);
+}
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 600px 400px at 15% 10%, rgba(0,212,255,0.04) 0%, transparent 70%),
+    radial-gradient(ellipse 500px 400px at 85% 80%, rgba(176,110,255,0.04) 0%, transparent 70%);
+}
+.page { position: relative; z-index: 1; }
+
+/* HEADER */
+.header {
+  padding: 28px 48px 24px;
+  border-bottom: 1px solid var(--c-border);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 32px;
+}
+.eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; font-weight: 500;
+  color: var(--c-gz); letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.eyebrow::before {
+  content: '';
+  display: inline-block; width: 20px; height: 1px;
+  background: var(--c-gz);
+}
+.main-title {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(30px, 5vw, 56px);
+  font-weight: 600;
+  line-height: 1.0;
+  color: var(--c-white);
+  letter-spacing: -1px;
+  margin-bottom: 10px;
+}
+.main-title em {
+  font-style: italic;
+  background: linear-gradient(100deg, var(--c-gz) 0%, var(--c-ml) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.subtitle {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--c-muted);
+  letter-spacing: 0.5px; line-height: 1.8;
+}
+.header-right {
+  display: flex; flex-direction: column; gap: 8px;
+  align-items: flex-end;
+}
+.src-pill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 500;
+  padding: 4px 10px; border-radius: 3px;
+  letter-spacing: 1px; text-transform: uppercase;
+}
+.sp-f { background: rgba(0,212,255,0.08); color: var(--c-gz); border: 1px solid rgba(0,212,255,0.2); }
+.sp-s { background: rgba(176,110,255,0.08); color: var(--c-ml); border: 1px solid rgba(176,110,255,0.2); }
+.sp-m { background: rgba(255,184,48,0.08); color: var(--c-gold); border: 1px solid rgba(255,184,48,0.2); }
+
+/* NAV */
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; padding: 0 48px;
+  background: rgba(6,8,15,0.88);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--c-border);
+  overflow-x: auto;
+}
+.nav::-webkit-scrollbar { height: 0; }
+.nav-btn {
+  display: flex; align-items: center; gap: 7px;
+  padding: 14px 20px; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 500;
+  color: var(--c-muted); letter-spacing: 0.5px;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: all 0.2s; user-select: none;
+}
+.nav-btn .n { font-size: 9px; opacity: 0.5; }
+.nav-btn:hover { color: var(--c-text); }
+.nav-btn.active { color: var(--c-gz); border-bottom-color: var(--c-gz); }
+
+/* CONTENT */
+.content { padding: 36px 48px 80px; max-width: 1600px; margin: 0 auto; }
+.panel { display: none; animation: rise 0.3s ease; }
+.panel.active { display: block; }
+@keyframes rise { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+.ph { margin-bottom: 28px; }
+.pt {
+  font-family: 'Fraunces', serif;
+  font-size: 26px; font-weight: 600;
+  color: var(--c-white);
+  margin-bottom: 4px;
+  display: flex; align-items: center; gap: 12px;
+}
+.pd { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--c-muted); line-height: 1.7; }
+.tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; padding: 3px 8px; border-radius: 2px;
+  background: rgba(0,212,255,0.08); color: var(--c-gz);
+  border: 1px solid rgba(0,212,255,0.2);
+  letter-spacing: 1px; text-transform: uppercase;
+}
+
+/* GRIDS */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+.g4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+.mt { margin-top: 18px; }
+
+/* CARDS */
+.card {
+  background: var(--c-card);
+  border: 1px solid var(--c-border);
+  border-radius: 12px; padding: 22px 24px;
+  position: relative; overflow: hidden;
+  transition: border-color 0.25s;
+}
+.card:hover { border-color: var(--c-border2); }
+.card::before {
+  content: '';
+  position: absolute; top:0; left:0; right:0; height:1px;
+  background: linear-gradient(90deg, transparent, rgba(0,212,255,0.15), transparent);
+}
+.ctitle {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; font-weight: 500;
+  color: var(--c-muted); letter-spacing: 1.5px;
+  text-transform: uppercase; margin-bottom: 18px;
+  display: flex; align-items: center; gap: 8px;
+}
+.dot { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+.dot-gz { background:var(--c-gz); box-shadow:0 0 8px var(--c-gz); }
+.dot-ml { background:var(--c-ml); box-shadow:0 0 8px var(--c-ml); }
+.dot-gd { background:var(--c-gold); }
+
+/* STAT CARDS */
+.sc {
+  background: var(--c-card);
+  border: 1px solid var(--c-border);
+  border-radius: 10px; padding: 18px 20px;
+  position: relative; overflow: hidden;
+}
+.sc::after {
+  content: '';
+  position: absolute; top:0; left:0; width:3px; bottom:0;
+  border-radius: 10px 0 0 10px;
+}
+.sc-gz::after { background:var(--c-gz); box-shadow:0 0 12px rgba(0,212,255,.5); }
+.sc-ml::after { background:var(--c-ml); box-shadow:0 0 12px rgba(176,110,255,.5); }
+.sc-both::after { background: linear-gradient(to bottom, var(--c-gz), var(--c-ml)); }
+.sl { font-family:'JetBrains Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:1.5px; color:var(--c-muted); margin-bottom:10px; }
+.sv { display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
+.sval { font-family:'Fraunces',serif; font-size:36px; font-weight:600; line-height:1; }
+.vgz { color:var(--c-gz); }
+.vml { color:var(--c-ml); }
+.svs { font-size:10px; color:var(--c-muted); font-family:'JetBrains Mono',monospace; }
+.sn { font-size:10px; color:var(--c-muted); margin-top:6px; font-family:'JetBrains Mono',monospace; line-height:1.5; }
+
+/* LEGEND */
+.leg { display:flex; gap:16px; margin-bottom:14px; flex-wrap:wrap; }
+.li { display:flex; align-items:center; gap:6px; }
+.lsq { width:12px; height:4px; border-radius:2px; }
+.ll { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--c-text); }
+
+/* INSIGHT */
+.insight {
+  background: linear-gradient(135deg, rgba(0,212,255,0.04), rgba(176,110,255,0.04));
+  border: 1px solid rgba(0,212,255,0.12);
+  border-radius: 8px; padding: 14px 18px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; line-height: 1.8;
+  color: var(--c-muted);
+}
+.insight strong { color:var(--c-text); font-weight:500; }
+.insight .gz { color:var(--c-gz); font-weight:700; }
+.insight .ml { color:var(--c-ml); font-weight:700; }
+
+/* PROGRESS BARS */
+.pbr { padding:8px 0; border-bottom:1px solid rgba(28,39,64,.5); }
+.pbr:last-child { border-bottom:none; }
+.pbm { display:flex; justify-content:space-between; margin-bottom:5px; font-family:'JetBrains Mono',monospace; font-size:10px; }
+.pbm .lb { color:var(--c-muted); }
+.pbm .vg { color:var(--c-gz); font-weight:700; }
+.pbm .vm { color:var(--c-ml); font-weight:700; }
+.pbt { background:rgba(28,39,64,.8); border-radius:2px; height:4px; margin-bottom:3px; overflow:hidden; }
+.pbf { height:100%; border-radius:2px; min-width:2px; }
+.pgz { background: linear-gradient(90deg, rgba(0,212,255,.3), var(--c-gz)); }
+.pml { background: linear-gradient(90deg, rgba(176,110,255,.3), var(--c-ml)); }
+.pgn { background: var(--c-muted2); }
+.prd { background: var(--c-red); }
+
+/* TABLE */
+.dt { width:100%; border-collapse:collapse; font-size:12px; }
+.dt th {
+  text-align:left; padding:9px 14px;
+  background:rgba(20,28,43,.8);
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px; color:var(--c-muted);
+  text-transform:uppercase; letter-spacing:1.2px;
+  border-bottom:1px solid var(--c-border);
+  white-space:nowrap;
+}
+.dt td { padding:9px 14px; border-bottom:1px solid rgba(28,39,64,.4); font-family:'JetBrains Mono',monospace; font-size:11px; }
+.dt tr:last-child td { border-bottom:none; }
+.dt tr:hover td { background:rgba(0,212,255,.02); }
+.gv { color:var(--c-gz); font-weight:700; }
+.mv { color:var(--c-ml); font-weight:700; }
+.sv2 { color:var(--c-muted); font-size:10px; }
+.lp { color:var(--c-green); font-weight:700; }
+.ln { color:var(--c-red);   font-weight:700; }
+.lu { color:var(--c-muted); font-weight:700; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width:5px; height:5px; }
+::-webkit-scrollbar-track { background:var(--c-bg); }
+::-webkit-scrollbar-thumb { background:var(--c-border2); border-radius:3px; }
+
+/* FOOTER */
+.footer {
+  position:relative; z-index:1;
+  padding:20px 48px;
+  border-top:1px solid var(--c-border);
+  display:flex; justify-content:space-between;
+  align-items:center; flex-wrap:wrap; gap:10px;
+}
+.ft { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--c-muted); line-height:1.7; }
+
+@media (max-width:1000px) {
+  .header,.content,.footer,.nav { padding-left:20px; padding-right:20px; }
+  .g2,.g3,.g4 { grid-template-columns:1fr; }
+  .header { grid-template-columns:1fr; }
+  .header-right { align-items:flex-start; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="header">
+  <div>
+    <div class="eyebrow">Investment Intelligence · Generational Analysis · 2023–2025</div>
+    <h1 class="main-title"><em>Gen Z</em> vs<br>Millennials</h1>
+    <div class="subtitle">Risk Tolerance · Portfolio Allocation · Trading Behavior<br>Three primary sources · Real data only · No estimates</div>
+  </div>
+  <div class="header-right">
+    <div class="src-pill sp-f">FINRA Foundation + CFA · 2023 · n=2,872</div>
+    <div class="src-pill sp-s">Charles Schwab MWS · 2025 Wave 2 · n=2,400</div>
+    <div class="src-pill sp-m">Motley Fool Survey · July 2025 · n=2,000</div>
+  </div>
+</header>
+
+<nav class="nav">
+  <div class="nav-btn active" onclick="show('overview',this)"><span class="n">01</span> Overview</div>
+  <div class="nav-btn" onclick="show('ownership',this)"><span class="n">02</span> Asset Ownership</div>
+  <div class="nav-btn" onclick="show('portfolio',this)"><span class="n">03</span> Portfolio Allocation</div>
+  <div class="nav-btn" onclick="show('stocks',this)"><span class="n">04</span> Stocks &amp; Sectors</div>
+  <div class="nav-btn" onclick="show('behavior',this)"><span class="n">05</span> Behavior &amp; Goals</div>
+  <div class="nav-btn" onclick="show('sources',this)"><span class="n">06</span> Info Sources</div>
+  <div class="nav-btn" onclick="show('master',this)"><span class="n">07</span> Master Table</div>
+</nav>
+
+<div class="content">
+
+<!-- ═══ PANEL 1: OVERVIEW ═══ -->
+<div class="panel active" id="panel-overview">
+  <div class="ph">
+    <div class="pt">Investment Overview <span class="tag">All Sources</span></div>
+    <div class="pd">Key metrics at a glance · FINRA 2023 · Schwab 2025 · Motley Fool 2025</div>
+  </div>
+  <div class="g4">
+    <div class="sc sc-gz"><div class="sl">Age Started Investing</div><div class="sv"><span class="sval vgz">19</span><span class="svs">vs 25 Millennials</span></div><div class="sn">Gen Z starts 6 years earlier · Schwab 2025</div></div>
+    <div class="sc sc-both"><div class="sl">Crypto Ownership Rate</div><div class="sv"><span class="sval vgz">55%</span><span class="svs">vs</span><span class="sval vml">57%</span></div><div class="sn">Nearly identical · FINRA 2023</div></div>
+    <div class="sc sc-gz"><div class="sl">Made Investment via FOMO</div><div class="sv"><span class="sval vgz">50%</span><span class="svs">vs</span><span class="sval vml">42%</span></div><div class="sn">FINRA 2023</div></div>
+    <div class="sc sc-gz"><div class="sl">Trade Daily or Weekly</div><div class="sv"><span class="sval vgz">50%</span><span class="svs">vs</span><span class="sval vml">43%</span></div><div class="sn">Motley Fool 2025</div></div>
+  </div>
+  <div class="g4 mt">
+    <div class="sc sc-gz"><div class="sl">First Investment was Crypto</div><div class="sv"><span class="sval vgz">44%</span><span class="svs">vs</span><span class="sval vml">35%</span></div><div class="sn">FINRA 2023 · Key differentiator</div></div>
+    <div class="sc sc-ml"><div class="sl">Primary Goal: Retirement</div><div class="sv"><span class="sval vgz">20%</span><span class="svs">vs</span><span class="sval vml">30%</span></div><div class="sn">Motley Fool 2025</div></div>
+    <div class="sc sc-gz"><div class="sl">Primary Goal: Passive Income</div><div class="sv"><span class="sval vgz">43%</span><span class="svs">vs</span><span class="sval vml">40%</span></div><div class="sn">Motley Fool 2025</div></div>
+    <div class="sc sc-gz"><div class="sl">Use Investing Apps to Trade</div><div class="sv"><span class="sval vgz">65%</span><span class="svs">vs</span><span class="sval vml">55%</span></div><div class="sn">FINRA 2023</div></div>
+  </div>
+  <div class="g2 mt">
+    <div class="card"><div class="ctitle"><span class="dot dot-gz"></span>Asset Ownership Snapshot · FINRA 2023</div><div class="leg"><div class="li"><div class="lsq" style="background:var(--c-gz)"></div><span class="ll">Gen Z</span></div><div class="li"><div class="lsq" style="background:var(--c-ml)"></div><span class="ll">Millennials</span></div></div><canvas id="ov_assets" style="max-height:220px"></canvas></div>
+    <div class="card"><div class="ctitle"><span class="dot dot-gd"></span>Investment Goals · Motley Fool 2025</div><div class="leg"><div class="li"><div class="lsq" style="background:var(--c-gz)"></div><span class="ll">Gen Z</span></div><div class="li"><div class="lsq" style="background:var(--c-ml)"></div><span class="ll">Millennials</span></div></div><canvas id="ov_goals" style="max-height:220px"></canvas></div>
+  </div>
+  <div class="insight mt">
+    <strong>The headline finding from three sources:</strong> Crypto ownership is nearly identical (<span class="gz">55% Gen Z</span> vs <span class="ml">57% Millennials</span>), yet the behavioral gap is stark. Gen Z is more likely to have <em>started</em> with crypto (<span class="gz">44%</span> vs <span class="ml">35%</span>), trades more frequently (<span class="gz">50% daily/weekly</span> vs <span class="ml">43%</span>), and frames investing as passive income rather than retirement planning. The generational split is less about <em>what</em> they own — and more about <em>why</em> and <em>how</em> they invest.
+  </div>
+</div>
+
+<!-- ═══ PANEL 2: ASSET OWNERSHIP ═══ -->
+<div class="panel" id="panel-ownership">
+  <div class="ph"><div class="pt">Asset Ownership Rates <span class="tag">FINRA 2023</span></div><div class="pd">% of investors who hold each asset class · n=2,872 · U.S., Canada, UK, China · Nov–Dec 2022</div></div>
+  <div class="g2">
+    <div class="card"><div class="ctitle"><span class="dot dot-gz"></span>Ownership by Asset Class</div><div class="leg"><div class="li"><div class="lsq" style="background:var(--c-gz)"></div><span class="ll">Gen Z</span></div><div class="li"><div class="lsq" style="background:var(--c-ml)"></div><span class="ll">Millennials</span></div><div class="li"><div class="lsq" style="background:var(--c-green)"></div><span class="ll">Gen X</span></div></div><canvas id="own_grouped" style="max-height:260px"></canvas></div>
+    <div class="card"><div class="ctitle"><span class="dot dot-gz"></span>Gen Z Asset Mix</div><canvas id="own_donut" style="max-height:280px"></canvas></div>
+  </div>
+  <div class="card mt"><div class="ctitle"><span class="dot dot-ml"></span>Detailed Comparison · All Generations</div>
+    <table class="dt"><thead><tr><th>Asset Class</th><th>Gen Z</th><th>Millennials</th><th>Gen X</th><th>Gen Z Lead</th><th>Notable</th></tr></thead>
+    <tbody>
+      <tr><td>Cryptocurrency</td><td class="gv">55%</td><td class="mv">57%</td><td>39%</td><td class="ln">–2pp</td><td>Nearly identical ownership</td></tr>
+      <tr><td>Individual Stocks</td><td class="gv">41%</td><td class="mv">38%</td><td>43%</td><td class="lp">+3pp</td><td>Gen Z leads</td></tr>
+      <tr><td>Mutual Funds</td><td class="gv">35%</td><td class="mv">43%</td><td>47%</td><td class="ln">–8pp</td><td>Millennials prefer managed funds</td></tr>
+      <tr><td>NFTs</td><td class="gv">25%</td><td class="mv">28%</td><td>15%</td><td class="ln">–3pp</td><td>Both young gens high</td></tr>
+      <tr><td>ETFs</td><td class="gv">23%</td><td class="mv">26%</td><td>22%</td><td class="ln">–3pp</td><td>Close across all generations</td></tr>
+      <tr><td>First investment was crypto</td><td class="gv">44%</td><td class="mv">35%</td><td>23%</td><td class="lp">+9pp</td><td>Strongest Gen Z differentiator</td></tr>
+    </tbody></table>
+    <div class="insight mt">⚠️ <strong>Important:</strong> These are <strong>ownership rates</strong> (% who hold the asset), not portfolio weight percentages.</div>
+  </div>
+</div>
+
+<!-- ═══ PANEL 3: PORTFOLIO ═══ -->
+<div class="panel" id="panel-portfolio">
+  <div class="ph"><div class="pt">Portfolio Allocation <span class="tag">Schwab 2025 Wave 2</span></div><div class="pd">Actual % portfolio weight across all U.S. investors · n=756 currently investing · October 2025 · Not broken out by generation in public report</div></div>
+  <div class="g2">
+    <div class="card"><div class="ctitle"><span class="dot dot-gz"></span>Average Portfolio Allocation — All U.S. Investors</div><canvas id="port_donut" style="max-height:300px"></canvas></div>
+    <div class="card"><div class="ctitle"><span class="dot dot-ml"></span>Allocation vs. Ownership Rate</div><div class="leg"><div class="li"><div class="lsq" style="background:var(--c-gz)"></div><span class="ll">Avg Portfolio Weight %</span></div><div class="li"><div class="lsq" style="background:var(--c-ml)"></div><span class="ll">% Who Own It</span></div></div><canvas id="port_compare" style="max-height:280px"></canvas></div>
+  </div>
+  <div class="g3 mt">
+    <div class="card"><div class="ctitle"><span class="dot dot-gz"></span>Crypto Ownership Breakdown</div>
+      <div class="pbr"><div class="pbm"><span class="lb">Currently own</span><span class="vg">29%</span></div><div class="pbt"><div class="pbf pgz" style="width:29%"></div></div></div>
+      <div class="pbr"><div class="pbm"><span class="lb">Previously owned</span><span class="lb">23%</span></div><div class="pbt"><div class="pbf pgn" style="width:23%"></div></div></div>
+      <div class="pbr"><div class="pbm"><span class="lb">Don't own, interested</span><span class="vm">11%</span></div><div class="pbt"><div class="pbf pml" style="width:11%"></div></div></div>
+      <div class="pbr"><div class="pbm"><span class="lb">Not interested</span><span style="color:var(--c-red)">35%</span></div><div class="pbt"><div class="pbf prd" style="width:35%"></div></div></div>
+    </div>
+    <div class="card"><div class="ctitle"><span class="dot dot-ml"></span>Why Own Crypto</div>
+      <div class="pbr"><div class="pbm"><span class="lb">Long-term growth potential</span><span class="vg">53%</span></div><div class="pbt"><div class="pbf pgz" style="width:53%"></div></div></div>
+      <div class="pbr"><div class="pbm"><span class="lb">Portfolio diversification</span><span class="vg">48%</span></div><div class="pbt"><div class="pbf pgz" style="width:48%"></div></div></div>
+      <div class="pbr"><div class="pbm"><span class="lb">Blockchain interest</span><span class="vm">42%</span></div><div class="pbt"><div class="pbf pml" style="width:42%"></div></div></div>
+      <div class="pbr"><div class="pbm"><span class="lb">Inflation hedge</span><span class="vm">35%</span></div><div class="pbt"><div class="pbf pml" style="width:35%"></div></div></div>
+      <div class="pbr"><div class="pbm"><span class="lb">Fun / hobby</span><span class="lb">34%</span></div><div class="pbt"><div class="pbf pgn" style="width:34%"></div></div></div>
+    </div>
+    <div class="card"><div class="ctitle"><span class="dot dot-gz"></span>Plan to Increase (next 20 yrs)</div>
+      <div class="pbr"><div class="pbm"><span class="lb">Cryptocurrencies</span><span class="vg">65%</span></div><div class="pbt"><div class="pbf pgz" style="width:65%"></div></div></div>
+      <div class="pbr"><div class="pbm"><span class="lb">Event contracts</span><span class="vm">53%</span></div><div class="pbt"><div class="pbf pml" style="width:53%"></div></div></div>
+      <div class="pbr"><div class="pbm"><span class="lb">ETFs</span><span class="vm">51%</span></div><div class="pbt"><div class="pbf pml" style="width:51%"></div></div></div>
+      <div class="pbr"><div class="pbm"><span class="lb">Alternatives</span><span class="lb">47%</span></div><div class="pbt"><div class="pbf pgn" style="width:47%"></div></div></div>
+      <div class="pbr"><div class="pbm"><span class="lb">Stocks</span><span class="lb">42%</span></div><div class="pbt"><div class="pbf pgn" style="width:42%"></div></div></div>
+      <div class="pbr"><div class="pbm"><span class="lb">Bonds</span><span class="lb">38%</span></div><div class="pbt"><div class="pbf pgn" style="width:38%"></div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PANEL 4: STOCKS & SECTORS ═══ -->
+<div class="panel" id="panel-stocks">
+  <div class="ph"><div class="pt">Stock Types &amp; Sectors <span class="tag">Motley Fool · July 2025</span></div><div class="pd">n=2,000 investors via Pollfish · July 17, 2025 · % who own each stock type or sector</div></div>
+  <div class="g2">
+    <div class="card"><div class="ctitle"><span class="dot dot-gz"></span>Stock Types Owned</div><div class="leg"><div class="li"><div class="lsq" style="background:var(--c-gz)"></div><span class="ll">Gen Z</span></div><div class="li"><div class="lsq" style="background:var(--c-ml)"></div><span class="ll">Millennials</span></div></div><canvas id="st_types" style="max-height:310px"></canvas></div>
+    <div class="card"><div class="ctitle"><span class="dot dot-ml"></span>Investment Sectors</div><div class="leg"><div class="li"><div class="lsq" style="background:var(--c-gz)"></div><span class="ll">Gen Z</span></div><div class="li"><div class="lsq" style="background:var(--c-ml)"></div><span class="ll">Millennials</span></div></div><canvas id="st_sectors" style="max-height:310px"></canvas></div>
+  </div>
+  <div class="card mt"><div class="ctitle"><span class="dot dot-gz"></span>Full Stock Type Breakdown</div>
+    <table class="dt"><thead><tr><th>Stock Type</th><th>Gen Z</th><th>Millennials</th><th>Gen X</th><th>Boomers</th><th>Gen Z Lead</th></tr></thead>
+    <tbody>
+      <tr><td>U.S. Stocks (broad)</td><td class="gv">42%</td><td class="mv">54%</td><td>56%</td><td>56%</td><td class="ln">–12pp</td></tr>
+      <tr><td>Growth Stocks</td><td class="gv">45%</td><td class="mv">48%</td><td>45%</td><td>43%</td><td class="ln">–3pp</td></tr>
+      <tr><td>Value Stocks</td><td class="gv">39%</td><td class="mv">39%</td><td>29%</td><td>16%</td><td class="lu">0pp</td></tr>
+      <tr><td>Dividend Stocks</td><td class="gv">28%</td><td class="mv">35%</td><td>43%</td><td>47%</td><td class="ln">–7pp</td></tr>
+      <tr><td>Small / Mid-Cap</td><td class="gv">31%</td><td class="mv">39%</td><td>45%</td><td>43%</td><td class="ln">–8pp</td></tr>
+      <tr><td>Large-Cap</td><td class="gv">26%</td><td class="mv">32%</td><td>38%</td><td>38%</td><td class="ln">–6pp</td></tr>
+      <tr><td>REITs</td><td class="gv">23%</td><td class="mv">23%</td><td>15%</td><td>9%</td><td class="lu">0pp</td></tr>
+      <tr><td>Speculative / Meme</td><td class="gv">13%</td><td class="mv">14%</td><td>9%</td><td>4%</td><td class="ln">–1pp</td></tr>
+      <tr><td>ESG / Socially Responsible</td><td class="gv">15%</td><td class="mv">13%</td><td>6%</td><td>4%</td><td class="lp">+2pp</td></tr>
+      <tr><td>Recent IPO Stocks</td><td class="gv">6%</td><td class="mv">3%</td><td>3%</td><td>1%</td><td class="lp">+3pp</td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<!-- ═══ PANEL 5: BEHAVIOR ═══ -->
+<div class="panel" id="panel-behavior">
+  <div class="ph"><div class="pt">Trading Behavior &amp; Goals</div><div class="pd">Trading frequency, risk appetite, FOMO indicators, dividend behavior and investment goals</div></div>
+  <div class="g2">
+    <div class="card"><div class="ctitle"><span class="dot dot-gz"></span>Trading Frequency · Motley Fool 2025</div><div class="leg"><div class="li"><div class="lsq" style="background:var(--c-gz)"></div><span class="ll">Gen Z</span></div><div class="li"><div class="lsq" style="background:var(--c-ml)"></div><span class="ll">Millennials</span></div></div><canvas id="beh_trade" style="max-height:220px"></canvas></div>
+    <div class="card"><div class="ctitle"><span class="dot dot-ml"></span>Risk &amp; FOMO Indicators · FINRA 2023</div><div class="leg"><div class="li"><div class="lsq" style="background:var(--c-gz)"></div><span class="ll">Gen Z</span></div><div class="li"><div class="lsq" style="background:var(--c-ml)"></div><span class="ll">Millennials</span></div></div><canvas id="beh_risk" style="max-height:220px"></canvas></div>
+  </div>
+  <div class="g3 mt">
+    <div class="card"><div class="ctitle"><span class="dot dot-gd"></span>Primary Investment Goals · Motley Fool 2025</div><div class="leg"><div class="li"><div class="lsq" style="background:var(--c-gz)"></div><span class="ll">Gen Z</span></div><div class="li"><div class="lsq" style="background:var(--c-ml)"></div><span class="ll">Millennials</span></div></div><canvas id="beh_goals" style="max-height:250px"></canvas></div>
+    <div class="card"><div class="ctitle"><span class="dot dot-gz"></span>Dividend Income Usage · Motley Fool 2025</div><div class="leg"><div class="li"><div class="lsq" style="background:var(--c-gz)"></div><span class="ll">Gen Z</span></div><div class="li"><div class="lsq" style="background:var(--c-ml)"></div><span class="ll">Millennials</span></div></div><canvas id="beh_divs" style="max-height:250px"></canvas></div>
+    <div class="card"><div class="ctitle"><span class="dot dot-ml"></span>Why Gen Z Started Investing · FINRA 2023</div>
+      <div class="pbr"><div class="pbm"><span class="lb">Ability to start with small amounts</span><span class="vg">67%</span></div><div class="pbt"><div class="pbf pgz" style="width:67%"></div></div></div>
+      <div class="pbr"><div class="pbm"><span class="lb">Curiosity / own interest</span><span class="vg">65%</span></div><div class="pbt"><div class="pbf pgz" style="width:65%"></div></div></div>
+      <div class="pbr"><div class="pbm"><span class="lb">Obtained money to invest</span><span class="vm">57%</span></div><div class="pbt"><div class="pbf pml" style="width:57%"></div></div></div>
+      <div class="pbr"><div class="pbm"><span class="lb">Parent / family influence</span><span class="vm">54%</span></div><div class="pbt"><div class="pbf pml" style="width:54%"></div></div></div>
+      <div class="pbr"><div class="pbm"><span class="lb">Ease of opening account</span><span class="lb">53%</span></div><div class="pbt"><div class="pbf pgn" style="width:53%"></div></div></div>
+      <div class="pbr"><div class="pbm"><span class="lb">Fear of missing out (FOMO)</span><span style="color:var(--c-red)">41%</span></div><div class="pbt"><div class="pbf prd" style="width:41%"></div></div></div>
+    </div>
+  </div>
+  <div class="insight mt">
+    <strong>The "side hustle" finding:</strong> <span class="gz">64% of Gen Z</span> describe dividends as a side hustle. Gen Z takes dividends as everyday cash (26%) or fun money (18%) far more than Millennials. Only <span class="gz">23%</span> of Gen Z reinvests automatically vs <span class="ml">38%</span> of Millennials — perfectly mirroring the goal data where Gen Z optimizes for income <em>now</em>.
+  </div>
+</div>
+
+<!-- ═══ PANEL 6: INFO SOURCES ═══ -->
+<div class="panel" id="panel-sources">
+  <div class="ph"><div class="pt">Information Sources <span class="tag">Motley Fool 2025 + FINRA 2023 + Schwab 2025</span></div><div class="pd">Where each generation goes for investing information and how much they trust each source</div></div>
+  <div class="g2">
+    <div class="card"><div class="ctitle"><span class="dot dot-gz"></span>Source Usage — Motley Fool 2025</div><div class="leg"><div class="li"><div class="lsq" style="background:var(--c-gz)"></div><span class="ll">Gen Z</span></div><div class="li"><div class="lsq" style="background:var(--c-ml)"></div><span class="ll">Millennials</span></div></div><canvas id="src_mf" style="max-height:290px"></canvas></div>
+    <div class="card"><div class="ctitle"><span class="dot dot-ml"></span>Social Media for Financial Info — Schwab 2025</div><canvas id="src_social" style="max-height:290px"></canvas></div>
+  </div>
+  <div class="card mt"><div class="ctitle"><span class="dot dot-gd"></span>Cross-Source Comparison</div>
+    <table class="dt"><thead><tr><th>Source</th><th>Gen Z (MF 2025)</th><th>Millennials (MF 2025)</th><th>Gen Z (FINRA 2023)</th><th>Schwab 2025 (Gen Z)</th></tr></thead>
+    <tbody>
+      <tr><td>YouTube</td><td class="gv">67%</td><td class="mv">56%</td><td>60%</td><td>—</td></tr>
+      <tr><td>TikTok</td><td class="gv">48%</td><td class="mv">26%</td><td>37%</td><td>—</td></tr>
+      <tr><td>Friends / Family</td><td class="gv">40%</td><td class="mv">42%</td><td>45%</td><td>—</td></tr>
+      <tr><td>Social Media (all)</td><td class="gv">—</td><td class="mv">—</td><td>48%</td><td>72%</td></tr>
+      <tr><td>Reddit</td><td class="gv">27%</td><td class="mv">28%</td><td>34%</td><td>—</td></tr>
+      <tr><td>Financial Advisor</td><td class="gv">25%</td><td class="mv">28%</td><td>30%</td><td>—</td></tr>
+      <tr><td>Free Website / Search</td><td class="gv">26%</td><td class="mv">37%</td><td>47%</td><td>—</td></tr>
+    </tbody></table>
+    <div class="insight mt"><strong>Trust vs. Usage gap:</strong> Despite heavy social media use, <strong>both FINRA 2023 and Schwab 2025 find that parents/family and financial professionals are the most <em>trusted</em> sources</strong> — even though they're not the most used. Gen Z uses YouTube and TikTok to discover, but still turns to family to validate.</div>
+  </div>
+</div>
+
+<!-- ═══ PANEL 7: MASTER TABLE ═══ -->
+<div class="panel" id="panel-master">
+  <div class="ph"><div class="pt">Master Comparison Table <span class="tag">All Sources · No Estimates</span></div><div class="pd">Every data point extracted directly from primary source documents · Real figures only</div></div>
+  <div class="card"><table class="dt"><thead><tr><th>Metric</th><th>Gen Z</th><th>Millennials</th><th>Gen Z Lead</th><th>Source</th></tr></thead><tbody id="master-rows"></tbody></table></div>
+</div>
+
+</div><!-- /content -->
+
+<footer class="footer">
+  <div class="ft">Sources: FINRA Foundation &amp; CFA Institute (May 2023) · Charles Schwab Modern Wealth Survey Wave 2 (Oct 2025) · Motley Fool Generational Investing Trends Survey (July 2025)<br>All data fetched directly from primary PDFs and source pages. No figures are estimated.</div>
+  <div class="ft" style="text-align:right">Built with real data · 2025</div>
+</footer>
+</div>
+
+<script>
+const GZ='#00D4FF', ML='#B06EFF', GREEN='#00E5A0', GOLD='#FFB830';
+const GZD='rgba(0,212,255,0.18)', MLD='rgba(176,110,255,0.18)';
+const GRID='rgba(28,39,64,0.7)', TICK='#4A5878', FONT="'JetBrains Mono',monospace";
+
+const bP = { legend:{display:false}, tooltip:{
+  backgroundColor:'#0F1520', borderColor:'#1C2740', borderWidth:1,
+  titleColor:'#C8D6EF', bodyColor:'#4A5878',
+  titleFont:{family:FONT,size:11}, bodyFont:{family:FONT,size:10}
+}};
+const bS = {
+  x:{ grid:{color:GRID}, ticks:{color:TICK,font:{size:10,family:FONT}} },
+  y:{ grid:{color:GRID}, ticks:{color:TICK,font:{size:10,family:FONT},callback:v=>v+'%'}, beginAtZero:true }
+};
+
+function mkBar(id,labels,datasets,opts={}) {
+  const ctx=document.getElementById(id); if(!ctx)return;
+  new Chart(ctx,{type:'bar',
+    data:{labels,datasets:datasets.map(d=>({...d,borderRadius:4,borderSkipped:false}))},
+    options:{responsive:true,plugins:{...bP,...(opts.plugins||{})},scales:{...bS,...(opts.scales||{})}}
+  });
+}
+function mkHBar(id,labels,datasets,opts={}) {
+  const ctx=document.getElementById(id); if(!ctx)return;
+  new Chart(ctx,{type:'bar',
+    data:{labels,datasets:datasets.map(d=>({...d,borderRadius:4}))},
+    options:{responsive:true,indexAxis:'y',
+      plugins:{...bP,...(opts.plugins||{})},
+      scales:{x:{...bS.x,ticks:{...bS.x.ticks,callback:v=>v+'%'}},y:{...bS.y,ticks:{...bS.y.ticks,callback:v=>v}}}
+    }
+  });
+}
+function mkDonut(id,labels,data,colors) {
+  const ctx=document.getElementById(id); if(!ctx)return;
+  new Chart(ctx,{type:'doughnut',
+    data:{labels,datasets:[{data,backgroundColor:colors,borderColor:'#06080F',borderWidth:3,hoverOffset:4}]},
+    options:{responsive:true,cutout:'60%',plugins:{...bP,legend:{display:true,position:'right',
+      labels:{color:TICK,font:{size:10,family:FONT},padding:10,boxWidth:12,boxHeight:8}}}}
+  });
+}
+
+// Charts
+mkBar('ov_assets',['Crypto','Ind. Stocks','Mut. Funds','ETFs','NFTs'],
+  [{label:'Gen Z',data:[55,41,35,23,25],backgroundColor:GZD,borderColor:GZ,borderWidth:1.5},
+   {label:'Millennials',data:[57,38,43,26,28],backgroundColor:MLD,borderColor:ML,borderWidth:1.5}],
+  {plugins:{...bP,legend:{display:true,labels:{color:TICK,font:{size:10,family:FONT}}}}});
+
+mkBar('ov_goals',['Passive Income','Retirement','Buy Home','Capital Growth','Start Business'],
+  [{label:'Gen Z',data:[43,20,16,7,9],backgroundColor:GZD,borderColor:GZ,borderWidth:1.5},
+   {label:'Millennials',data:[40,30,9,10,4],backgroundColor:MLD,borderColor:ML,borderWidth:1.5}],
+  {plugins:{...bP,legend:{display:true,labels:{color:TICK,font:{size:10,family:FONT}}}}});
+
+mkBar('own_grouped',['Crypto','Stocks','Mut. Funds','NFTs','ETFs'],
+  [{label:'Gen Z',data:[55,41,35,25,23],backgroundColor:GZD,borderColor:GZ,borderWidth:1.5},
+   {label:'Millennials',data:[57,38,43,28,26],backgroundColor:MLD,borderColor:ML,borderWidth:1.5},
+   {label:'Gen X',data:[39,43,47,15,22],backgroundColor:'rgba(0,229,160,0.12)',borderColor:GREEN,borderWidth:1.5}],
+  {plugins:{...bP,legend:{display:true,labels:{color:TICK,font:{size:10,family:FONT}}}}});
+
+mkDonut('own_donut',['Crypto 55%','Stocks 41%','Mut.Funds 35%','NFTs 25%','ETFs 23%'],
+  [55,41,35,25,23],[GZ,'#818CF8',GREEN,GOLD,ML]);
+
+mkDonut('port_donut',
+  ['Stocks 25%','Other 25%','Mut.Funds 13%','Crypto 10%','Bonds 8%','Real Estate 7%','ETFs 6%','Options 3%','Alts 3%'],
+  [25,25,13,10,8,7,6,3,3],
+  [GZ,'#475569','#22D3EE',GOLD,'#6366F1',GREEN,ML,'#F87171','#FB923C']);
+
+mkBar('port_compare',['Stocks','Mut. Funds','Bonds','Crypto','Real Estate','ETFs'],
+  [{label:'Avg Portfolio Weight',data:[25,13,8,10,7,6],backgroundColor:GZD,borderColor:GZ,borderWidth:1.5},
+   {label:'% Who Own It',data:[64,41,37,35,25,27],backgroundColor:MLD,borderColor:ML,borderWidth:1.5}],
+  {plugins:{...bP,legend:{display:true,labels:{color:TICK,font:{size:10,family:FONT}}}}});
+
+mkHBar('st_types',['U.S. Stocks','Growth','Value','Dividend','Small/Mid','Large-Cap','REITs','Speculative','ESG'],
+  [{label:'Gen Z',data:[42,45,39,28,31,26,23,13,15],backgroundColor:GZD,borderColor:GZ,borderWidth:1.5},
+   {label:'Millennials',data:[54,48,39,35,39,32,23,14,13],backgroundColor:MLD,borderColor:ML,borderWidth:1.5}],
+  {plugins:{...bP,legend:{display:true,labels:{color:TICK,font:{size:10,family:FONT}}}}});
+
+mkHBar('st_sectors',['Technology','Financials','Healthcare','Energy','Real Estate','Consumer','Crypto-Related','AI Stocks','Industrials'],
+  [{label:'Gen Z',data:[50,36,29,30,29,16,23,22,20],backgroundColor:GZD,borderColor:GZ,borderWidth:1.5},
+   {label:'Millennials',data:[58,38,36,34,26,22,28,21,20],backgroundColor:MLD,borderColor:ML,borderWidth:1.5}],
+  {plugins:{...bP,legend:{display:true,labels:{color:TICK,font:{size:10,family:FONT}}}}});
+
+mkBar('beh_trade',['Daily','Weekly','Multiple/Mo','Once/Mo','<Once/Mo'],
+  [{label:'Gen Z',data:[16,34,24,10,16],backgroundColor:GZD,borderColor:GZ,borderWidth:1.5},
+   {label:'Millennials',data:[14,29,27,9,20],backgroundColor:MLD,borderColor:ML,borderWidth:1.5}],
+  {plugins:{...bP,legend:{display:true,labels:{color:TICK,font:{size:10,family:FONT}}}}});
+
+mkBar('beh_risk',['Substantial Risk','FOMO Investment','First: Crypto','Use Apps'],
+  [{label:'Gen Z',data:[46,50,44,65],backgroundColor:GZD,borderColor:GZ,borderWidth:1.5},
+   {label:'Millennials',data:[38,42,35,55],backgroundColor:MLD,borderColor:ML,borderWidth:1.5}],
+  {plugins:{...bP,legend:{display:true,labels:{color:TICK,font:{size:10,family:FONT}}}}});
+
+mkBar('beh_goals',['Passive\nIncome','Retirement','Buy\nHome','Capital\nGrowth','Start\nBusiness','Pay\nDebt'],
+  [{label:'Gen Z',data:[43,20,16,7,9,5],backgroundColor:GZD,borderColor:GZ,borderWidth:1.5},
+   {label:'Millennials',data:[40,30,9,10,4,7],backgroundColor:MLD,borderColor:ML,borderWidth:1.5}],
+  {plugins:{...bP,legend:{display:true,labels:{color:TICK,font:{size:10,family:FONT}}}}});
+
+mkBar('beh_divs',['Everyday\nCash','Fun\nMoney','Save\nGoals','Reinvest\nAuto','Reallocate'],
+  [{label:'Gen Z',data:[26,18,19,23,11],backgroundColor:GZD,borderColor:GZ,borderWidth:1.5},
+   {label:'Millennials',data:[17,15,17,38,9],backgroundColor:MLD,borderColor:ML,borderWidth:1.5}],
+  {plugins:{...bP,legend:{display:true,labels:{color:TICK,font:{size:10,family:FONT}}}}});
+
+mkHBar('src_mf',['YouTube','TikTok','Friends/Family','Reddit','Fin. Advisor','Free Website','Podcasts'],
+  [{label:'Gen Z',data:[67,48,40,27,25,26,22],backgroundColor:GZD,borderColor:GZ,borderWidth:1.5},
+   {label:'Millennials',data:[56,26,42,28,28,37,24],backgroundColor:MLD,borderColor:ML,borderWidth:1.5}],
+  {plugins:{...bP,legend:{display:true,labels:{color:TICK,font:{size:10,family:FONT}}}}});
+
+mkBar('src_social',['Gen Z','Millennials','Gen X','Boomers'],
+  [{label:'Use Social Media for Fin. Info',data:[72,57,38,19],
+    backgroundColor:[GZD,MLD,'rgba(0,229,160,0.12)','rgba(255,184,48,0.12)'],
+    borderColor:[GZ,ML,GREEN,GOLD],borderWidth:1.5}]);
+
+// Master table
+const MASTER=[
+  ['Crypto ownership rate','55%','57%','-2pp','FINRA 2023'],
+  ['Individual stock ownership','41%','38%','+3pp','FINRA 2023'],
+  ['ETF ownership','23%','26%','-3pp','FINRA 2023'],
+  ['Mutual fund ownership','35%','43%','-8pp','FINRA 2023'],
+  ['NFT ownership','25%','28%','-3pp','FINRA 2023'],
+  ['First investment was crypto','44%','35%','+9pp','FINRA 2023'],
+  ['Made investment due to FOMO','50%','42%','+8pp','FINRA 2023'],
+  ['Willing to take substantial risk','46%','~38%','+8pp','FINRA 2023'],
+  ['Use investing apps to trade','65%','55%','+10pp','FINRA 2023'],
+  ['App suggestion influenced trade','67%','79%','-12pp','FINRA 2023'],
+  ['Age started investing','19 yrs','25 yrs','–6 yrs','Schwab 2025'],
+  ['Currently investing (% pop.)','45%','54%','-9pp','Schwab 2025'],
+  ['Confident in strategy','71%','68%','+3pp','Schwab 2025'],
+  ['Use social media for fin. info','72%','57%','+15pp','Schwab 2025'],
+  ['Follow financial influencers','42%','37%','+5pp','Schwab 2025'],
+  ['Crypto: avg portfolio weight','10%*','10%*','—','Schwab 2025 W2'],
+  ['Stocks: avg portfolio weight','25%*','25%*','—','Schwab 2025 W2'],
+  ['Currently own crypto','29%*','29%*','—','Schwab 2025 W2'],
+  ['60/40 portfolio outdated','46%','46%','0pp','Schwab 2025 W2'],
+  ['Short-term risk-taking needed','54%','53%','+1pp','Schwab 2025 W2'],
+  ['U.S. stocks ownership','42%','54%','-12pp','Motley Fool 2025'],
+  ['Growth stocks ownership','45%','48%','-3pp','Motley Fool 2025'],
+  ['Value stocks ownership','39%','39%','0pp','Motley Fool 2025'],
+  ['Dividend stocks ownership','28%','35%','-7pp','Motley Fool 2025'],
+  ['ESG stocks ownership','15%','13%','+2pp','Motley Fool 2025'],
+  ['Technology sector','50%','58%','-8pp','Motley Fool 2025'],
+  ['Healthcare sector','29%','36%','-7pp','Motley Fool 2025'],
+  ['Real estate sector','29%','26%','+3pp','Motley Fool 2025'],
+  ['Crypto-related stocks','23%','28%','-5pp','Motley Fool 2025'],
+  ['AI stocks','22%','21%','+1pp','Motley Fool 2025'],
+  ['Primary goal: passive income','43%','40%','+3pp','Motley Fool 2025'],
+  ['Primary goal: retirement','20%','30%','-10pp','Motley Fool 2025'],
+  ['Primary goal: buying a home','16%','9%','+7pp','Motley Fool 2025'],
+  ['Trade daily or weekly','50%','43%','+7pp','Motley Fool 2025'],
+  ['Trade less than once/month','16%','20%','-4pp','Motley Fool 2025'],
+  ['Use YouTube for investing info','67%','56%','+11pp','Motley Fool 2025'],
+  ['Use TikTok for investing info','48%','26%','+22pp','Motley Fool 2025'],
+  ['Dividends: take as everyday cash','26%','17%','+9pp','Motley Fool 2025'],
+  ['Dividends: reinvest auto','23%','38%','-15pp','Motley Fool 2025'],
+  ['View dividends as "side hustle"','64%','53%','+11pp','Motley Fool 2025'],
+  ['Have documented financial plan','39%','36%','+3pp','Schwab 2025 W1'],
+];
+const tbody=document.getElementById('master-rows');
+MASTER.forEach(([m,gz,ml,lead,src])=>{
+  const cls=lead.startsWith('+')?'lp':lead.startsWith('-')?'ln':'lu';
+  tbody.innerHTML+=`<tr><td>${m}</td><td class="gv">${gz}</td><td class="mv">${ml}</td><td class="${cls}">${lead}</td><td class="sv2">${src}</td></tr>`;
+});
+
+// Navigation
+function show(id,el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>
