@@ -38,19 +38,7 @@ python3 genz_vs_millennials_dashboard.py
 ```
 ```
 
-5. Scroll down → click **"Commit changes"** → **"Commit directly to main"** → green **Commit changes** button
 
----
-
-## Step 5: Enable GitHub Pages (Live Website)
-
-1. Click **Settings** (top menu of your repo)
-2. Scroll down the left sidebar → click **Pages**
-3. Under **Source** → click the dropdown that says **"None"** → select **"main"**
-4. Click **Save**
-5. Wait about **2 minutes**
-6. Refresh the page — you'll see a green box saying:
-```
 ✅ Your site is live at:
 https://SiddhantZade1.github.io/Genz-VS-Millenials-investment-analysis/
 ```
